@@ -21,7 +21,10 @@ exports.homePage = class homePage {
     this.contactusButton = page.locator('a[href="/contact_us"]');
     this.testCasesLink = page.getByRole('link', { name: 'Test Cases', exact: true });
     this.testCasesText = page.getByText('Below is the list of test Cases for you to practice the Automation.', { exact: false });
-
+    this.productsLink = page.getByRole('link', { name: 'Products'});
+    this.subscriptionHeading = page.locator('h2', { hasText: 'Subscription' });
+    this.emailInput = page.locator('input#susbscribe_email[type="email"]');
+    this.arrowIcon = page.locator('i.fa.fa-arrow-circle-o-right');
   }
 
   async gotoURL() {

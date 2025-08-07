@@ -11,6 +11,7 @@ exports.homePage = class homePage {
     this.consentButton = page.locator('p.fc-button-label', { hasText: 'Consent' });
     this.homeButton = page.locator('a[href="/"]'); //a href="/" 
     this.registerloginButton = page.locator('a[href="/login"]');
+    this.logoutButton = page.locator('a[href="/logout"]');
     this.productButton = page.locator('a[href="/products]"');
     this.cartButton = page.locator('a[href="/view_cart"]');
     this.homepageText = page.locator('h2', { hasText: 'Full-Fledged practice website for Automation Engineers' });

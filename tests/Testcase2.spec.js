@@ -14,7 +14,7 @@ test('Test Case 2: Login User with correct email and password', async ({ page })
      await homepage.gotoURL();
 
      //Select Consent button
-     await homepage.consentButton.click()
+     await genericUtils.handleConsent(page);
 
      //Verify homepage is visible
      await genericUtils.verifyElementVisible(homepage.girlimage1);

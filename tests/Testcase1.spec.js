@@ -16,7 +16,8 @@ test('Test Case 1: Register User', async ({ page }) => {
   await homepage.gotoURL();
 
   //Select Consent button
-  await homepage.consentButton.click()
+  await genericUtils.handleConsent(page);
+
 
   //Verify that home page is visible successfully
   await genericUtils.verifyElementVisible(homepage.girlimage1);

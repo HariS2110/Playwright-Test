@@ -17,5 +17,6 @@ exports.loginPage = class loginPage {
     this.loginpasswordField = page.locator('input[data-qa="login-password"]');
     this.loginButton = page.locator('button[data-qa="login-button"]');
     this.loginError = page.locator('p', { hasText: 'Your email or password is incorrect!' });
+    this.emailexistsError = page.locator('p', { hasText: 'Email Address already exist!' });
 }
   }

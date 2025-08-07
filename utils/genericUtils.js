@@ -25,5 +25,12 @@ export class genericUtils{
     }
   }
 
+  static handleBrowserDialogs(page) {
+    page.on('dialog', async (dialog) => {
+      console.log(`Dialog detected with message: "${dialog.message()}"`);
+      await dialog.accept();
+    });
+  }
+
 }
 

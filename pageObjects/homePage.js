@@ -18,6 +18,10 @@ exports.homePage = class homePage {
     this.girlimage1 = page.locator('img[src="/static/images/home/girl2.jpg"]');
     this.girlimage2 = page.locator('img[src="/static/images/home/girl1.jpg"]');
     this.girlimage3 = page.locator('img[src="/static/images/home/girl3.jpg"]');
+    this.contactusButton = page.locator('a[href="/contact_us"]');
+    this.testCasesLink = page.getByRole('link', { name: 'Test Cases', exact: true });
+    this.testCasesText = page.getByText('Below is the list of test Cases for you to practice the Automation.', { exact: false });
+
   }
 
   async gotoURL() {

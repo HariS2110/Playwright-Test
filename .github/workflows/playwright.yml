@@ -17,11 +17,19 @@ jobs:
         with:
           node-version: lts/*
 
+      #Cache Playwright browsers
       - name: Cache Playwright Browsers
         uses: actions/cache@v3
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright
+
+      # (Optional) Cache node_modules to speed up npm ci
+      # - name: Cache node modules
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.npm
+      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
         run: npm ci
@@ -29,39 +37,12 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests and generate HTML report
-        run: |
-          npx playwright test --reporter=html
-          # Ensure report directory exists
-          mkdir -p playwright-report
+      - name: Run Playwright tests
+        run: npx playwright test
 
-      - name: Upload HTML report to branch
-        run: |
-          REPORT_BRANCH="playwright-reports"
-          
-          # Configure git
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Verify report exists
-          if [ ! -d "playwright-report" ]; then
-            echo "❌ Error: No HTML report found in playwright-report directory"
-            exit 1
-          fi
-          
-          # Create temporary directory and copy report
-          mkdir -p temp-report
-          cp -r playwright-report/* temp-report/
-          
-          # Checkout or create report branch
-          git fetch origin $REPORT_BRANCH:$REPORT_BRANCH || true
-          git checkout $REPORT_BRANCH || git checkout --orphan $REPORT_BRANCH
-          
-          # Clean branch and copy new report
-          find . -not -path './.git*' -delete
-          cp -r temp-report/* .
-          
-          # Commit and push
-          git add .
-          git commit -m "Update Playwright report [skip ci]" || echo "No changes to commit"
-          git push origin $REPORT_BRANCH --force
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

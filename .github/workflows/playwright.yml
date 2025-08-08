@@ -17,19 +17,11 @@ jobs:
         with:
           node-version: lts/*
 
-      # Cache Playwright browsers
       - name: Cache Playwright Browsers
         uses: actions/cache@v3
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright
-
-      # (Optional) Cache node modules to speed up npm ci
-      # - name: Cache node modules
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ~/.npm
-      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
         run: npm ci
@@ -40,28 +32,36 @@ jobs:
       - name: Run Playwright tests and generate HTML report
         run: |
           npx playwright test --reporter=html
-          # Trigger report generation (optional but recommended)
-          npx playwright show-report --port=9222 --host=127.0.0.1 & sleep 2 && kill $!
+          # Ensure report directory exists
+          mkdir -p playwright-report
 
       - name: Upload HTML report to branch
         run: |
-          REPORT_BRANCH="playwright-report"
+          REPORT_BRANCH="playwright-reports"
+          
+          # Configure git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
+          
+          # Verify report exists
           if [ ! -d "playwright-report" ]; then
-            echo "❌ No HTML report found. Did the tests run?"
+            echo "❌ Error: No HTML report found in playwright-report directory"
             exit 1
           fi
-
-          mkdir temp-report
+          
+          # Create temporary directory and copy report
+          mkdir -p temp-report
           cp -r playwright-report/* temp-report/
-
-          git fetch origin
-          git checkout $REPORT_BRANCH 2>/dev/null || git checkout --orphan $REPORT_BRANCH
-          rm -rf ./*
-          cp -r temp-report/* ./
-
+          
+          # Checkout or create report branch
+          git fetch origin $REPORT_BRANCH:$REPORT_BRANCH || true
+          git checkout $REPORT_BRANCH || git checkout --orphan $REPORT_BRANCH
+          
+          # Clean branch and copy new report
+          find . -not -path './.git*' -delete
+          cp -r temp-report/* .
+          
+          # Commit and push
           git add .
           git commit -m "Update Playwright report [skip ci]" || echo "No changes to commit"
           git push origin $REPORT_BRANCH --force

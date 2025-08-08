@@ -1,11 +1,21 @@
 import { test, expect } from '@playwright/test';
 
-test('POST /api/productsList should return 405', async ({ request }) => {
-  const response = await request.post('https://automationexercise.com/api/productsList');
+test('POST to productsList API should return error message', async ({ request }) => {
+  const apiUrl = 'https://automationexercise.com/api/productsList';
 
-  // Validate the response status
+  // Send POST request
+  const response = await request.post(apiUrl);
+
+  // Log status just to see
+  console.log('Status code:', response.status());
+
+  // Expect 200 because API always returns 200
   expect(response.status()).toBe(200);
-  const responseBody = await response.text();
-  expect(responseBody).toContain('This request method is not supported');
 
+  // Get response body
+  const body = await response.text();
+  console.log('Response body:', body);
+
+  // Verify message is in response
+  expect(body).toContain('This request method is not supported.');
 });

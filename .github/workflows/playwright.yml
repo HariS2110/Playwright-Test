@@ -1,4 +1,5 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
@@ -9,7 +10,13 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -17,32 +24,28 @@ jobs:
         with:
           node-version: lts/*
 
-      #Cache Playwright browsers
+      # Cache Playwright browsers
       - name: Cache Playwright Browsers
         uses: actions/cache@v3
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright
 
-      # (Optional) Cache node_modules to speed up npm ci
-      # - name: Cache node modules
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ~/.npm
-      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
+      # Install dependencies
       - name: Install dependencies
         run: npm ci
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      # Run Playwright tests (Chromium + Firefox, already in config)
       - name: Run Playwright tests
         run: npx playwright test
 
+      # Upload HTML report
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.os }}
           path: playwright-report/
           retention-days: 30

@@ -63,6 +63,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: playwright-report
+          destination_dir: playwright
 
       - name: Print report link
         run: |

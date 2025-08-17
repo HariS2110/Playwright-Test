@@ -33,7 +33,7 @@ test('Test Case 2: Login User with correct email and password', async ({ page })
      await loginpage.loginButton.click();
 
      //Verify that logged in as username is visible 
-     await genericUtils.verifyElementVisible(loggedinpage.accountDeletedText);
+     await genericUtils.verifyElementVisible(loggedinpage.loggedInAs);
 
   
    });

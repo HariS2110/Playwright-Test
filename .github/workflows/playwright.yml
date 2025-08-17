@@ -42,8 +42,8 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
 
-      # Convert SQLite DB to CSV
-      - name: Convert DB to CSV
+      - name: Convert DB to CSV (only on Ubuntu)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update && sudo apt-get install -y sqlite3
           sqlite3 -header -csv utils/test-results.db "SELECT * FROM test_results;" > utils/test-results.csv

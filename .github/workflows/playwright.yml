@@ -42,6 +42,14 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
 
+      # Upload SQLite DB
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-db-${{ matrix.os }}
+          path: utils/test-results.db
+          retention-days: 30
+
       # Upload HTML report
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

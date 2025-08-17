@@ -10,5 +10,9 @@
   "devDependencies": {
     "@playwright/test": "^1.54.2",
     "@types/node": "^24.2.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "uuid": "^11.1.0"
   }
 }

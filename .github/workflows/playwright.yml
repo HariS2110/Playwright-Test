@@ -61,7 +61,7 @@ jobs:
 
       # Upload CSV artifact
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && runner.os == 'Linux'
         with:
           name: playwright-csv-${{ matrix.os }}
           path: utils/test-results.csv

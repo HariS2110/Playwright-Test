@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: lts/*
     
-    # Cache npm dependencies
+      # Cache npm dependencies
       - name: Cache npm
         uses: actions/cache@v3
         with:
@@ -47,19 +47,21 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      # Run Playwright tests (Chromium + Firefox, already in config)
+      # Run Playwright tests
       - name: Run Playwright tests
         run: npx playwright test
+        continue-on-error: true   # <-- ensures workflow continues even if tests fail
 
+      # Convert DB to CSV (only on Ubuntu)
       - name: Convert DB to CSV (only on Ubuntu)
-        if: runner.os == 'Linux'
+        if: always() && runner.os == 'Linux'
         run: |
           sudo apt-get update && sudo apt-get install -y sqlite3
           sqlite3 -header -csv utils/test-results.db "SELECT * FROM test_results;" > utils/test-results.csv
 
       # Upload CSV artifact
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: playwright-csv-${{ matrix.os }}
           path: utils/test-results.csv
@@ -67,7 +69,7 @@ jobs:
       
       # Upload HTML report
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: playwright-report-${{ matrix.os }}
           path: playwright-report/

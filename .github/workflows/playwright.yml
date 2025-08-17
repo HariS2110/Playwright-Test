@@ -42,14 +42,20 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
 
-      # Upload SQLite DB
+      # Convert SQLite DB to CSV
+      - name: Convert DB to CSV
+        run: |
+          sudo apt-get update && sudo apt-get install -y sqlite3
+          sqlite3 -header -csv utils/test-results.db "SELECT * FROM test_results;" > utils/test-results.csv
+
+      # Upload CSV artifact
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-db-${{ matrix.os }}
-          path: utils/test-results.db
+          name: playwright-csv-${{ matrix.os }}
+          path: utils/test-results.csv
           retention-days: 30
-
+      
       # Upload HTML report
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -57,6 +63,7 @@ jobs:
           name: playwright-report-${{ matrix.os }}
           path: playwright-report/
           retention-days: 30
+
   deploy-report:
     needs: test
     runs-on: ubuntu-latest
@@ -68,14 +75,14 @@ jobs:
           name: playwright-report-ubuntu-latest
           path: playwright-report
 
-      # Download DB artifact
-      - name: Download DB from Ubuntu job
+      # Download CSV artifact (instead of DB)
+      - name: Download CSV from Ubuntu job
         uses: actions/download-artifact@v4
         with:
-          name: playwright-db-ubuntu-latest
-          path: playwright-report  
+          name: playwright-csv-ubuntu-latest
+          path: playwright-report  # copy CSV into report folder
 
-      # Deploy report + DB to GitHub Pages
+      # Deploy report + CSV to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -83,8 +90,8 @@ jobs:
           publish_dir: playwright-report
           keep_files: true
 
-      - name: Print report & DB links
+      - name: Print report & CSV links
         run: |
           echo "✅ Playwright report published at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
           echo "Direct report link: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/index.html"
-          echo "Direct DB link: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-results.db"
+          echo "Direct CSV link: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-results.csv"

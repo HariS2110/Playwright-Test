@@ -7,6 +7,11 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+# Cancel previous runs on the same branch/PR to save minutes
+concurrency:
+  group: playwright-tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     timeout-minutes: 60
@@ -23,6 +28,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+
+      # Cache npm dependencies
+      - name: Cache npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       # Cache Playwright browsers
       - name: Cache Playwright Browsers
@@ -68,19 +82,21 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      # Download report artifact
-      - name: Download report from Ubuntu job
+      # Download all reports (Linux, macOS, Windows)
+      - name: Download all reports
         uses: actions/download-artifact@v4
         with:
-          name: playwright-report-ubuntu-latest
+          pattern: playwright-report-*
           path: playwright-report
+          merge-multiple: true
 
-      # Download CSV artifact (instead of DB)
-      - name: Download CSV from Ubuntu job
+      # Download all CSVs (Linux only for now, but extendable if others added)
+      - name: Download CSVs
         uses: actions/download-artifact@v4
         with:
-          name: playwright-csv-ubuntu-latest
-          path: playwright-report  # copy CSV into report folder
+          pattern: playwright-csv-*
+          path: playwright-report
+          merge-multiple: true
 
       # Deploy report + CSV to GitHub Pages
       - name: Deploy to GitHub Pages
@@ -88,7 +104,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: playwright-report
-          keep_files: true
+          keep_files: false   # only keep the latest report
 
       - name: Print report & CSV links
         run: |

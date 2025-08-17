@@ -61,11 +61,21 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      # Download report artifact
       - name: Download report from Ubuntu job
         uses: actions/download-artifact@v4
         with:
           name: playwright-report-ubuntu-latest
           path: playwright-report
+
+      # Download DB artifact
+      - name: Download DB from Ubuntu job
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-db-ubuntu-latest
+          path: playwright-report  
+
+      # Deploy report + DB to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -73,7 +83,8 @@ jobs:
           publish_dir: playwright-report
           keep_files: true
 
-      - name: Print report link
+      - name: Print report & DB links
         run: |
           echo "✅ Playwright report published at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          echo "Direct link: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/index.html"
+          echo "Direct report link: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/index.html"
+          echo "Direct DB link: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-results.db"
